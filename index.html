@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Juego de Flechas</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="fondo" src="fondo.png" style="position:absolute; z-index:-1;">
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <div id="puntaje">Puntaje: 0</div>
+    <div id="vidas">Vidas: 8</div>
+    <button class="boton-reiniciar" onclick="reiniciar()">Reiniciar</button>
+
+    <script>
+      // Inicializamos el canvas y sus propiedades
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+      var puntaje = 0;
+      var vidas = 8;
+
+    	// Cargamos la imagen de fondo
+		var fondo = new Image();
+		fondo.src = "fondo.png";
+		fondo.onload = function() {
+			// Dibujamos el fondo en el canvas
+			ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+		}
+
+      // Creamos el arquero
+      var arquero = {
+        x: 50,
+        y: canvas.height / 2,
+        velocidad: 5,
+        sprite: new Image(),
+      };
+      arquero.sprite.src = "arquero.png";
+
+      // Creamos los objetivos
+      var objetivos = [];
+      function crearObjetivo() {
+        var objetivo = {
+          x: canvas.width,
+          y: Math.random() * canvas.height,
+          velocidad: 2,
+          sprite: new Image(),
+        };
+        objetivo.sprite.src = "objetivo.png";
+        objetivos.push(objetivo);
+      }
+      crearObjetivo();
+      setInterval(crearObjetivo, 1000);
+
+      // Creamos las flechas
+      var flechas = [];
+      function crearFlecha() {
+        var flecha = {
+          x: arquero.x + 50,
+          y: arquero.y + 25,
+          velocidad: 10,
+          sprite: new Image(),
+        };
+        flecha.sprite.src = "flecha.png";
+        flechas.push(flecha);
+      }
+
+      // Función para actualizar el juego
+      function actualizar() {
+  // Movemos el arquero
+  if (teclas[38] && arquero.y > 0) {
+    arquero.y -= arquero.velocidad;
+  }
+  if (teclas[40] && arquero.y < canvas.height - 50) {
+    arquero.y += arquero.velocidad;
+  }
+
+  // Movemos los objetivos
+  for (var i = 0; i < objetivos.length; i++) {
+    objetivos[i].x -= objetivos[i].velocidad;
+  }
+
+  // Movemos las flechas
+  for (var i = 0; i < flechas.length; i++) {
+    flechas[i].x += flechas[i].velocidad;
+  }
+
+  // Dibujamos los elementos en el canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(arquero.sprite, arquero.x, arquero.y, 50, 50);
+  for (var i = 0; i < objetivos.length; i++) {
+    ctx.drawImage(
+      objetivos[i].sprite,
+      objetivos[i].x,
+      objetivos[i].y,
+      50,
+      50
+    );
+  }
+  for (var i = 0; i < flechas.length; i++) {
+    ctx.drawImage(flechas[i].sprite, flechas[i].x, flechas[i].y, 50, 50);
+  }
+  for (var i = 0; i < flechas.length; i++) {
+    for (var j = 0; j < objetivos.length; j++) {
+      if (
+        flechas[i].x < objetivos[j].x + 50 &&
+        flechas[i].x + 50 > objetivos[j].x &&
+        flechas[i].y < objetivos[j].y + 50 &&
+        flechas[i].y + 50 > objetivos[j].y
+      ) {
+        // Si hay colisión, eliminamos la flecha y el objetivo, y sumamos puntaje
+        flechas.splice(i, 1);
+        objetivos.splice(j, 1);
+        puntaje += 10;
+        document.getElementById("puntaje").innerHTML = "Puntaje: " + puntaje;
+      }
+    }
+  }
+  // Detectamos las colisiones entre objetivos y el arquero
+  for (var i = 0; i < objetivos.length; i++) {
+    if (
+      objetivos[i].x < arquero.x + 50 &&
+      objetivos[i].x + 50 > arquero.x &&
+      objetivos[i].y < arquero.y + 50 &&
+      objetivos[i].y + 50 > arquero.y
+    ) {
+      // Si hay colisión, eliminamos el objetivo y restamos una vida
+      objetivos.splice(i, 1);
+      vidas--;
+      if (vidas === 0) {
+        clearInterval(intervalo);
+        alert("¡Juego terminado! Felices 11 meses <3<3<3");
+      }
+      document.getElementById("vidas").innerHTML = "Vidas: " + vidas;
+    }
+  }
+}
+
+      var teclas = [];
+      document.addEventListener("keydown", function (event) {
+        teclas[event.keyCode] = true;
+      });
+      document.addEventListener("keyup", function (event) {
+        delete teclas[event.keyCode];
+      });
+      // Creamos un intervalo para actualizar el juego cada 10 milisegundos
+      var intervalo = setInterval(actualizar, 10);
+
+      // Función para reiniciar el juego
+      function reiniciar() {
+        puntaje = 0;
+        vidas = 8;
+        objetivos = [];
+        flechas = [];
+        arquero.y = canvas.height / 2;
+        clearInterval(intervalo);
+        intervalo = setInterval(actualizar, 10);
+        document.getElementById("puntaje").innerHTML = "Puntaje: " + puntaje;
+      }
+    </script>
+  </body>
+</html>

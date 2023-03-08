@@ -1,0 +1,12 @@
+.boton-reiniciar {
+    background-color: blue;
+    color: white;
+    font-size: 18px;
+    font-family: 'Roboto', sans-serif;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+  }
+  #puntaje, #vidas {
+    font-family: "Arial", sans-serif;
+  }
